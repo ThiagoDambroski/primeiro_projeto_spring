@@ -1,5 +1,6 @@
 package com.dambroski.primeiro_projeto;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,13 +13,20 @@ import com.dambroski.primeiro_projeto.domain.Cidade;
 import com.dambroski.primeiro_projeto.domain.Cliente;
 import com.dambroski.primeiro_projeto.domain.Endereco;
 import com.dambroski.primeiro_projeto.domain.Estado;
+import com.dambroski.primeiro_projeto.domain.Pagamento;
+import com.dambroski.primeiro_projeto.domain.PagamentoComBoleto;
+import com.dambroski.primeiro_projeto.domain.PagamentoComCartao;
+import com.dambroski.primeiro_projeto.domain.Pedido;
 import com.dambroski.primeiro_projeto.domain.Produto;
+import com.dambroski.primeiro_projeto.domain.enums.EstadoPagamento;
 import com.dambroski.primeiro_projeto.domain.enums.TipoCliente;
 import com.dambroski.primeiro_projeto.repositories.CategoriaRepository;
 import com.dambroski.primeiro_projeto.repositories.CidadeRepository;
 import com.dambroski.primeiro_projeto.repositories.ClienteRepository;
 import com.dambroski.primeiro_projeto.repositories.EnderecoRepository;
 import com.dambroski.primeiro_projeto.repositories.EstadoRepository;
+import com.dambroski.primeiro_projeto.repositories.PagamentoRepository;
+import com.dambroski.primeiro_projeto.repositories.PedidoRepository;
 import com.dambroski.primeiro_projeto.repositories.ProdutoRepository;
 
 @SpringBootApplication
@@ -41,6 +49,12 @@ public class PrimeiroProjetoApplication implements CommandLineRunner {
 	
 	@Autowired
 	private EnderecoRepository enderecoRepository;
+	
+	@Autowired
+	private PedidoRepository pedidoRepository;
+	
+	@Autowired
+	private PagamentoRepository pagamentoRepository;
 
 	public static void main(String[] args) {
 		SpringApplication.run(PrimeiroProjetoApplication.class, args);
@@ -94,6 +108,20 @@ public class PrimeiroProjetoApplication implements CommandLineRunner {
 		clienteRository.saveAll(Arrays.asList(cli1));
 		enderecoRepository.saveAll(Arrays.asList(e1,e2));
 		
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+		Pedido ped1 = new Pedido(null,sdf.parse("30/09/2017 10:32"),cli1,e1);
+		Pedido ped2 = new Pedido(null,sdf.parse("10/10/2017 00:00"),cli1,e2);
+		
+		Pagamento pagto1 = new PagamentoComCartao(null,EstadoPagamento.QUITADO,ped1,6);
+		ped1.setPagamento(pagto1);
+		Pagamento pagto2 = new PagamentoComBoleto(null, EstadoPagamento.PENDENTE, ped2, sdf.parse("20/10/2017 00:00")
+				, null);
+		ped2.setPagamento(pagto2);
+		
+		cli1.getPedidos().addAll(Arrays.asList(ped1,ped2));
+		
+		pedidoRepository.saveAll(Arrays.asList(ped1,ped2));
+		pagamentoRepository.saveAll(Arrays.asList(pagto1,pagto2));
 		
 
 	}
